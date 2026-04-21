@@ -1,4 +1,3 @@
-using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using task_20260420.Features.Employees.Commands.AddEmployees;
@@ -19,11 +18,13 @@ public class EmployeeController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly EmployeeParserFactory _parserFactory;
+    private readonly IContentExtractor _contentExtractor;
 
-    public EmployeeController(IMediator mediator, EmployeeParserFactory parserFactory)
+    public EmployeeController(IMediator mediator, EmployeeParserFactory parserFactory, IContentExtractor contentExtractor)
     {
         _mediator = mediator;
         _parserFactory = parserFactory;
+        _contentExtractor = contentExtractor;
     }
 
     /// <summary>
@@ -89,47 +90,10 @@ public class EmployeeController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Add(IFormFile? file, [FromForm] string? data)
     {
-        string content;
-        string? fileName = null;
+        var (content, fileName) = await _contentExtractor.ExtractAsync(file, data, Request);
+        var employees = _parserFactory.Parse(content, fileName);
+        var result = await _mediator.Send(new AddEmployeesCommand(employees));
 
-        // 1순위: 파일 업로드 (input type=file)
-        if (file is not null && file.Length > 0)
-        {
-            fileName = file.FileName;
-            using var reader = new StreamReader(file.OpenReadStream(), Encoding.UTF8);
-            content = await reader.ReadToEndAsync();
-        }
-        // 2순위: 폼 텍스트 필드 (textarea)
-        else if (!string.IsNullOrWhiteSpace(data))
-        {
-            content = data;
-        }
-        // 3순위: raw body (폼이 아닌 직접 본문 전송)
-        else if (!Request.HasFormContentType)
-        {
-            using var reader = new StreamReader(Request.Body, Encoding.UTF8);
-            content = await reader.ReadToEndAsync();
-        }
-        else
-        {
-            return BadRequest(new { status = 400, message = "파일 또는 데이터를 입력해 주세요." });
-        }
-
-        if (string.IsNullOrWhiteSpace(content))
-            return BadRequest(new { status = 400, message = "입력 데이터가 비어 있습니다." });
-
-        try
-        {
-            // 포맷 자동 감지 후 파싱 → Command 디스패치
-            var employees = _parserFactory.Parse(content, fileName);
-            var command = new AddEmployeesCommand(employees);
-            var result = await _mediator.Send(command);
-
-            return Created(string.Empty, result);
-        }
-        catch (FormatException ex)
-        {
-            return BadRequest(new { status = 400, message = ex.Message });
-        }
+        return Created(string.Empty, result);
     }
 }

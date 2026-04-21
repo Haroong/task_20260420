@@ -51,6 +51,7 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 builder.Services.AddScoped<IEmployeeParser, CsvEmployeeParser>();
 builder.Services.AddScoped<IEmployeeParser, JsonEmployeeParser>();
 builder.Services.AddScoped<EmployeeParserFactory>();
+builder.Services.AddScoped<IContentExtractor, ContentExtractor>();
 
 var app = builder.Build();
 
