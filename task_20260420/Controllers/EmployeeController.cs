@@ -43,11 +43,6 @@ public class EmployeeController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        if (page < 1)
-            return BadRequest(new ErrorResponse(400, "page는 1 이상이어야 합니다."));
-        if (pageSize < 1 || pageSize > 100)
-            return BadRequest(new ErrorResponse(400, "pageSize는 1~100 사이여야 합니다."));
-
         var result = await _mediator.Send(new GetEmployeesQuery(page, pageSize));
         return Ok(result);
     }
