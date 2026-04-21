@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using task_20260420.Common.Models;
 using task_20260420.Features.Employees.Commands.AddEmployees;
 using task_20260420.Features.Employees.Queries.GetEmployeeByName;
 using task_20260420.Features.Employees.Queries.GetEmployees;
@@ -43,9 +44,9 @@ public class EmployeeController : ControllerBase
         [FromQuery] int pageSize = 10)
     {
         if (page < 1)
-            return BadRequest(new { status = 400, message = "page는 1 이상이어야 합니다." });
+            return BadRequest(new ErrorResponse(400, "page는 1 이상이어야 합니다."));
         if (pageSize < 1 || pageSize > 100)
-            return BadRequest(new { status = 400, message = "pageSize는 1~100 사이여야 합니다." });
+            return BadRequest(new ErrorResponse(400, "pageSize는 1~100 사이여야 합니다."));
 
         var result = await _mediator.Send(new GetEmployeesQuery(page, pageSize));
         return Ok(result);
@@ -66,7 +67,7 @@ public class EmployeeController : ControllerBase
         var result = await _mediator.Send(new GetEmployeeByNameQuery(name));
 
         if (result is null)
-            return NotFound(new { status = 404, message = $"'{name}' 직원을 찾을 수 없습니다." });
+            return NotFound(new ErrorResponse(404, $"'{name}' 직원을 찾을 수 없습니다."));
 
         return Ok(result);
     }
