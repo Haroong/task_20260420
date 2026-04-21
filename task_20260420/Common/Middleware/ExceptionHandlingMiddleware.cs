@@ -36,6 +36,10 @@ public class ExceptionHandlingMiddleware
                 HttpStatusCode.BadRequest,
                 string.Join("; ", validationEx.Errors.Select(e => e.ErrorMessage))),
 
+            KeyNotFoundException keyNotFoundEx => (
+                HttpStatusCode.NotFound,
+                keyNotFoundEx.Message),
+
             FormatException formatEx => (
                 HttpStatusCode.BadRequest,
                 formatEx.Message),

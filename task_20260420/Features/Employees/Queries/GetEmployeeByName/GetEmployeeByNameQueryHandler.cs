@@ -5,7 +5,7 @@ using task_20260420.Infrastructure;
 
 namespace task_20260420.Features.Employees.Queries.GetEmployeeByName;
 
-public class GetEmployeeByNameQueryHandler : IRequestHandler<GetEmployeeByNameQuery, EmployeeDto?>
+public class GetEmployeeByNameQueryHandler : IRequestHandler<GetEmployeeByNameQuery, EmployeeDto>
 {
     private readonly AppDbContext _db;
 
@@ -14,13 +14,13 @@ public class GetEmployeeByNameQueryHandler : IRequestHandler<GetEmployeeByNameQu
         _db = db;
     }
 
-    public async Task<EmployeeDto?> Handle(GetEmployeeByNameQuery request, CancellationToken cancellationToken)
+    public async Task<EmployeeDto> Handle(GetEmployeeByNameQuery request, CancellationToken cancellationToken)
     {
         var employee = await _db.Employees
             .FirstOrDefaultAsync(e => e.Name == request.Name, cancellationToken);
 
         if (employee is null)
-            return null;
+            throw new KeyNotFoundException($"'{request.Name}' 직원을 찾을 수 없습니다.");
 
         return new EmployeeDto(
             employee.Name,

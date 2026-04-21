@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using task_20260420.Common.Models;
 using task_20260420.Features.Employees.Commands.AddEmployees;
 using task_20260420.Features.Employees.Queries.GetEmployeeByName;
 using task_20260420.Features.Employees.Queries.GetEmployees;
@@ -60,10 +59,6 @@ public class EmployeeController : ControllerBase
     public async Task<IActionResult> GetByName(string name)
     {
         var result = await _mediator.Send(new GetEmployeeByNameQuery(name));
-
-        if (result is null)
-            return NotFound(new ErrorResponse(404, $"'{name}' 직원을 찾을 수 없습니다."));
-
         return Ok(result);
     }
 

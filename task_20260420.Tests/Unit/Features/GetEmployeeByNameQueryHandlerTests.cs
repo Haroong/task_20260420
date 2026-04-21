@@ -34,20 +34,21 @@ public class GetEmployeeByNameQueryHandlerTests : IDisposable
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.Should().NotBeNull();
-        result!.Name.Should().Be("김철수");
+        result.Name.Should().Be("김철수");
         result.Email.Should().Be("charles@test.com");
         result.Tel.Should().Be("01012345678");
         result.Joined.Should().Be("2020-01-01");
     }
 
     [Fact]
-    public async Task Handle_NonExistingName_ReturnsNull()
+    public async Task Handle_NonExistingName_ThrowsKeyNotFoundException()
     {
         var query = new GetEmployeeByNameQuery("존재하지않는이름");
 
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var act = () => _handler.Handle(query, CancellationToken.None);
 
-        result.Should().BeNull();
+        await act.Should().ThrowAsync<KeyNotFoundException>()
+            .WithMessage("*존재하지않는이름*");
     }
 
     public void Dispose()
