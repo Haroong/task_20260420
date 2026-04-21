@@ -25,11 +25,7 @@ public class GetEmployeesQueryHandler : IRequestHandler<GetEmployeesQuery, Paged
             .ToListAsync(cancellationToken);
 
         var employees = entities
-            .Select(e => new EmployeeDto(
-                e.Name,
-                e.Email,
-                e.Tel,
-                e.Joined.ToString("yyyy-MM-dd")))
+            .Select(EmployeeDto.FromEntity)
             .ToList();
 
         return new PagedResult<EmployeeDto>(employees, totalCount, request.Page, request.PageSize);

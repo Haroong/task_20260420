@@ -22,10 +22,6 @@ public class GetEmployeeByNameQueryHandler : IRequestHandler<GetEmployeeByNameQu
         if (employee is null)
             throw new KeyNotFoundException($"'{request.Name}' 직원을 찾을 수 없습니다.");
 
-        return new EmployeeDto(
-            employee.Name,
-            employee.Email,
-            employee.Tel,
-            employee.Joined.ToString("yyyy-MM-dd"));
+        return EmployeeDto.FromEntity(employee);
     }
 }
