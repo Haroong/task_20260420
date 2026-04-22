@@ -1,8 +1,8 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using task_20260420.Domain;
 using task_20260420.Features.Employees.Commands.AddEmployees;
 using task_20260420.Infrastructure;
+using task_20260420.Services;
 
 namespace task_20260420.Tests.Unit.Features;
 
@@ -17,18 +17,17 @@ public class AddEmployeesCommandHandlerTests : IDisposable
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _db = new AppDbContext(options);
-        _handler = new AddEmployeesCommandHandler(_db);
+
+        var parsers = new IEmployeeParser[] { new CsvEmployeeParser(), new JsonEmployeeParser() };
+        var parserFactory = new EmployeeParserFactory(parsers);
+        _handler = new AddEmployeesCommandHandler(_db, parserFactory);
     }
 
     [Fact]
-    public async Task Handle_ValidEmployees_AddsToDatabase()
+    public async Task Handle_ValidCsv_AddsToDatabase()
     {
-        var employees = new List<Employee>
-        {
-            new() { Name = "김철수", Email = "charles@test.com", Tel = "01012345678", Joined = new DateTime(2020, 1, 1) },
-            new() { Name = "박영희", Email = "younghee@test.com", Tel = "01087654321", Joined = new DateTime(2021, 5, 15) }
-        };
-        var command = new AddEmployeesCommand(employees);
+        var csv = "김철수, charles@test.com, 01012345678, 2020.01.01\n박영희, younghee@test.com, 01087654321, 2021.05.15";
+        var command = new AddEmployeesCommand(csv, "employees.csv");
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -37,13 +36,10 @@ public class AddEmployeesCommandHandlerTests : IDisposable
     }
 
     [Fact]
-    public async Task Handle_SingleEmployee_AddsToDatabase()
+    public async Task Handle_ValidJson_AddsToDatabase()
     {
-        var employees = new List<Employee>
-        {
-            new() { Name = "홍길동", Email = "gildong@test.com", Tel = "01011112222", Joined = new DateTime(2019, 3, 10) }
-        };
-        var command = new AddEmployeesCommand(employees);
+        var json = """[{"name":"홍길동","email":"gildong@test.com","tel":"01011112222","joined":"2019-03-10"}]""";
+        var command = new AddEmployeesCommand(json, "employees.json");
 
         var result = await _handler.Handle(command, CancellationToken.None);
 

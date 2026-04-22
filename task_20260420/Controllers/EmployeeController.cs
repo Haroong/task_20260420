@@ -17,13 +17,11 @@ namespace task_20260420.Controllers;
 public class EmployeeController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly EmployeeParserFactory _parserFactory;
     private readonly IContentExtractor _contentExtractor;
 
-    public EmployeeController(IMediator mediator, EmployeeParserFactory parserFactory, IContentExtractor contentExtractor)
+    public EmployeeController(IMediator mediator, IContentExtractor contentExtractor)
     {
         _mediator = mediator;
-        _parserFactory = parserFactory;
         _contentExtractor = contentExtractor;
     }
 
@@ -80,8 +78,7 @@ public class EmployeeController : ControllerBase
     public async Task<IActionResult> Add(IFormFile? file, [FromForm] string? data)
     {
         var (content, fileName) = await _contentExtractor.ExtractAsync(file, data, Request);
-        var employees = _parserFactory.Parse(content, fileName);
-        var result = await _mediator.Send(new AddEmployeesCommand(employees));
+        var result = await _mediator.Send(new AddEmployeesCommand(content, fileName));
 
         return Created(string.Empty, BaseResponse<AddEmployeesResult>.OnCreated(result));
     }
