@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using task_20260420.Common;
 using task_20260420.Domain;
 
 namespace task_20260420.Services;
@@ -85,10 +86,7 @@ public class JsonEmployeeParser : IEmployeeParser
 
     private sealed class FlexibleDateTimeConverter : JsonConverter<DateTime>
     {
-        private static readonly string[] Formats =
-        {
-            "yyyy-MM-dd", "yyyy.MM.dd", "yyyy/MM/dd"
-        };
+        private static readonly string[] Formats = DateFormats.Supported;
 
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

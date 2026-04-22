@@ -1,16 +1,13 @@
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
+using task_20260420.Common;
 using task_20260420.Domain;
 
 namespace task_20260420.Services;
 
 public class CsvEmployeeParser : IEmployeeParser
 {
-    private static readonly string[] DateFormats =
-    {
-        "yyyy.MM.dd", "yyyy-MM-dd", "yyyy/MM/dd"
-    };
 
     public bool CanParse(string content, string? fileName)
     {
@@ -56,7 +53,7 @@ public class CsvEmployeeParser : IEmployeeParser
                 if (string.IsNullOrWhiteSpace(dateStr))
                     throw new FormatException("입사일은 필수 항목입니다.");
 
-                if (!DateTime.TryParseExact(dateStr, DateFormats, CultureInfo.InvariantCulture,
+                if (!DateTime.TryParseExact(dateStr, DateFormats.Supported, CultureInfo.InvariantCulture,
                         DateTimeStyles.None, out var joined))
                     throw new FormatException($"날짜 형식이 올바르지 않습니다: '{dateStr}'");
 
