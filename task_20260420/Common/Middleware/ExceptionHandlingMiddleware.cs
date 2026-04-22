@@ -58,7 +58,10 @@ public class ExceptionHandlingMiddleware
                 "서버 내부 오류가 발생했습니다.")
         };
 
-        _logger.LogError(exception, "요청 처리 중 오류 발생: {Message}", exception.Message);
+        if (statusCode >= HttpStatusCode.InternalServerError)
+            _logger.LogError(exception, "요청 처리 중 서버 오류 발생: {Message}", exception.Message);
+        else
+            _logger.LogWarning(exception, "요청 처리 중 클라이언트 오류 발생: {StatusCode} {Message}", (int)statusCode, exception.Message);
 
         context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
