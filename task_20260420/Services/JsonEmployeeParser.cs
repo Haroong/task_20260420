@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using task_20260420.Common;
+using task_20260420.Common.Exceptions;
 using task_20260420.Domain;
 
 namespace task_20260420.Services;
@@ -26,7 +27,7 @@ public class JsonEmployeeParser : IEmployeeParser
     public List<Employee> Parse(string content)
     {
         if (string.IsNullOrWhiteSpace(content))
-            throw new FormatException("JSON 데이터가 비어 있습니다.");
+            throw new InvalidFormatException("JSON 데이터가 비어 있습니다.");
 
         try
         {
@@ -36,26 +37,26 @@ public class JsonEmployeeParser : IEmployeeParser
             if (trimmed.StartsWith('['))
             {
                 dtos = JsonSerializer.Deserialize<List<EmployeeJsonDto>>(content, Options)
-                       ?? throw new FormatException("JSON 배열 파싱에 실패했습니다.");
+                       ?? throw new InvalidFormatException("JSON 배열 파싱에 실패했습니다.");
             }
             else
             {
                 var single = JsonSerializer.Deserialize<EmployeeJsonDto>(content, Options)
-                             ?? throw new FormatException("JSON 객체 파싱에 실패했습니다.");
+                             ?? throw new InvalidFormatException("JSON 객체 파싱에 실패했습니다.");
                 dtos = [single];
             }
 
             if (dtos.Count == 0)
-                throw new FormatException("파싱된 직원 데이터가 없습니다.");
+                throw new InvalidFormatException("파싱된 직원 데이터가 없습니다.");
 
             return dtos.Select(dto =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Name))
-                    throw new FormatException("이름은 필수 항목입니다.");
+                    throw new InvalidFormatException("이름은 필수 항목입니다.");
                 if (string.IsNullOrWhiteSpace(dto.Email))
-                    throw new FormatException("이메일은 필수 항목입니다.");
+                    throw new InvalidFormatException("이메일은 필수 항목입니다.");
                 if (string.IsNullOrWhiteSpace(dto.Tel))
-                    throw new FormatException("전화번호는 필수 항목입니다.");
+                    throw new InvalidFormatException("전화번호는 필수 항목입니다.");
 
                 return new Employee
                 {
@@ -68,11 +69,11 @@ public class JsonEmployeeParser : IEmployeeParser
         }
         catch (JsonException ex)
         {
-            throw new FormatException($"JSON 형식이 올바르지 않습니다: {ex.Message}", ex);
+            throw new InvalidFormatException($"JSON 형식이 올바르지 않습니다: {ex.Message}", ex);
         }
         catch (InvalidOperationException ex)
         {
-            throw new FormatException($"JSON 데이터 타입이 올바르지 않습니다: {ex.Message}", ex);
+            throw new InvalidFormatException($"JSON 데이터 타입이 올바르지 않습니다: {ex.Message}", ex);
         }
     }
 

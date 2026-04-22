@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using task_20260420.Common.Exceptions;
 
 namespace task_20260420.Common.Behaviors;
 
@@ -32,7 +33,10 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
             .ToList();
 
         if (failures.Count > 0)
-            throw new ValidationException(failures);
+        {
+            var message = string.Join("; ", failures.Select(f => f.ErrorMessage));
+            throw new ValidationFailedException(message);
+        }
 
         return await next();
     }

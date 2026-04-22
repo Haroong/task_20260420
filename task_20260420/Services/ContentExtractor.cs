@@ -1,4 +1,5 @@
 using System.Text;
+using task_20260420.Common.Exceptions;
 
 namespace task_20260420.Services;
 
@@ -29,6 +30,6 @@ public class ContentExtractor : IContentExtractor
                 return (content, null);
         }
 
-        throw new ArgumentException("파일 또는 데이터를 입력해 주세요.");
+        throw new InvalidArgumentException("파일 또는 데이터를 입력해 주세요.");
     }
 }

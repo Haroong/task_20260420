@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using task_20260420.Common.Exceptions;
 using task_20260420.Features.Employees.Models;
 using task_20260420.Infrastructure;
 
@@ -20,7 +21,7 @@ public class GetEmployeeByNameQueryHandler : IRequestHandler<GetEmployeeByNameQu
             .FirstOrDefaultAsync(e => e.Name == request.Name, cancellationToken);
 
         if (employee is null)
-            throw new KeyNotFoundException($"'{request.Name}' 직원을 찾을 수 없습니다.");
+            throw new NotFoundException($"'{request.Name}' 직원을 찾을 수 없습니다.");
 
         return EmployeeDto.FromEntity(employee);
     }

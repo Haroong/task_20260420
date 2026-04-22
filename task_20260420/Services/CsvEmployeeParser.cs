@@ -2,6 +2,7 @@ using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using task_20260420.Common;
+using task_20260420.Common.Exceptions;
 using task_20260420.Domain;
 
 namespace task_20260420.Services;
@@ -21,7 +22,7 @@ public class CsvEmployeeParser : IEmployeeParser
     public List<Employee> Parse(string content)
     {
         if (string.IsNullOrWhiteSpace(content))
-            throw new FormatException("CSV 데이터가 비어 있습니다.");
+            throw new InvalidFormatException("CSV 데이터가 비어 있습니다.");
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -45,17 +46,17 @@ public class CsvEmployeeParser : IEmployeeParser
                 var dateStr = csv.GetField<string>(3)?.Trim();
 
                 if (string.IsNullOrWhiteSpace(name))
-                    throw new FormatException("이름은 필수 항목입니다.");
+                    throw new InvalidFormatException("이름은 필수 항목입니다.");
                 if (string.IsNullOrWhiteSpace(email))
-                    throw new FormatException("이메일은 필수 항목입니다.");
+                    throw new InvalidFormatException("이메일은 필수 항목입니다.");
                 if (string.IsNullOrWhiteSpace(tel))
-                    throw new FormatException("전화번호는 필수 항목입니다.");
+                    throw new InvalidFormatException("전화번호는 필수 항목입니다.");
                 if (string.IsNullOrWhiteSpace(dateStr))
-                    throw new FormatException("입사일은 필수 항목입니다.");
+                    throw new InvalidFormatException("입사일은 필수 항목입니다.");
 
                 if (!DateTime.TryParseExact(dateStr, DateFormats.Supported, CultureInfo.InvariantCulture,
                         DateTimeStyles.None, out var joined))
-                    throw new FormatException($"날짜 형식이 올바르지 않습니다: '{dateStr}'");
+                    throw new InvalidFormatException($"날짜 형식이 올바르지 않습니다: '{dateStr}'");
 
                 employees.Add(new Employee
                 {
@@ -67,17 +68,17 @@ public class CsvEmployeeParser : IEmployeeParser
             }
 
             if (employees.Count == 0)
-                throw new FormatException("파싱된 직원 데이터가 없습니다.");
+                throw new InvalidFormatException("파싱된 직원 데이터가 없습니다.");
 
             return employees;
         }
-        catch (FormatException)
+        catch (InvalidFormatException)
         {
             throw;
         }
         catch (Exception ex)
         {
-            throw new FormatException($"CSV 형식이 올바르지 않습니다: {ex.Message}", ex);
+            throw new InvalidFormatException($"CSV 형식이 올바르지 않습니다: {ex.Message}", ex);
         }
     }
 
