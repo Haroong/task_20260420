@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using task_20260420.Common.Exceptions;
 using task_20260420.Domain;
 using task_20260420.Features.Employees.Queries.GetEmployeeByName;
 using task_20260420.Infrastructure;
@@ -41,13 +42,13 @@ public class GetEmployeeByNameQueryHandlerTests : IDisposable
     }
 
     [Fact]
-    public async Task Handle_NonExistingName_ThrowsKeyNotFoundException()
+    public async Task Handle_NonExistingName_ThrowsNotFoundException()
     {
         var query = new GetEmployeeByNameQuery("존재하지않는이름");
 
         var act = () => _handler.Handle(query, CancellationToken.None);
 
-        await act.Should().ThrowAsync<KeyNotFoundException>()
+        await act.Should().ThrowAsync<NotFoundException>()
             .WithMessage("*존재하지않는이름*");
     }
 

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using task_20260420.Common.Exceptions;
 using task_20260420.Services;
 
 namespace task_20260420.Tests.Unit.Services;
@@ -71,38 +72,38 @@ public class CsvEmployeeParserTests
     }
 
     [Fact]
-    public void Parse_EmptyString_ThrowsFormatException()
+    public void Parse_EmptyString_ThrowsInvalidFormatException()
     {
         var act = () => _parser.Parse("");
 
-        act.Should().Throw<FormatException>().WithMessage("*비어*");
+        act.Should().Throw<InvalidFormatException>().WithMessage("*비어*");
     }
 
     [Fact]
-    public void Parse_WhitespaceOnly_ThrowsFormatException()
+    public void Parse_WhitespaceOnly_ThrowsInvalidFormatException()
     {
         var act = () => _parser.Parse("   ");
 
-        act.Should().Throw<FormatException>();
+        act.Should().Throw<InvalidFormatException>();
     }
 
     [Fact]
-    public void Parse_InvalidDate_ThrowsFormatException()
+    public void Parse_InvalidDate_ThrowsInvalidFormatException()
     {
         var csv = "김철수, test@test.com, 01012345678, invalid-date";
 
         var act = () => _parser.Parse(csv);
 
-        act.Should().Throw<FormatException>().WithMessage("*날짜*");
+        act.Should().Throw<InvalidFormatException>().WithMessage("*날짜*");
     }
 
     [Fact]
-    public void Parse_MissingColumns_ThrowsFormatException()
+    public void Parse_MissingColumns_ThrowsInvalidFormatException()
     {
         var csv = "김철수, test@test.com";
 
         var act = () => _parser.Parse(csv);
 
-        act.Should().Throw<FormatException>();
+        act.Should().Throw<InvalidFormatException>();
     }
 }

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using task_20260420.Common.Exceptions;
 using task_20260420.Services;
 
 namespace task_20260420.Tests.Unit.Services;
@@ -79,36 +80,36 @@ public class JsonEmployeeParserTests
     }
 
     [Fact]
-    public void Parse_EmptyString_ThrowsFormatException()
+    public void Parse_EmptyString_ThrowsInvalidFormatException()
     {
         var act = () => _parser.Parse("");
 
-        act.Should().Throw<FormatException>();
+        act.Should().Throw<InvalidFormatException>();
     }
 
     [Fact]
-    public void Parse_InvalidJson_ThrowsFormatException()
+    public void Parse_InvalidJson_ThrowsInvalidFormatException()
     {
         var act = () => _parser.Parse("{invalid json}");
 
-        act.Should().Throw<FormatException>().WithMessage("*JSON*");
+        act.Should().Throw<InvalidFormatException>().WithMessage("*JSON*");
     }
 
     [Fact]
-    public void Parse_MissingName_ThrowsFormatException()
+    public void Parse_MissingName_ThrowsInvalidFormatException()
     {
         var json = """[{"email":"test@test.com", "tel":"01012345678", "joined":"2020-01-01"}]""";
 
         var act = () => _parser.Parse(json);
 
-        act.Should().Throw<FormatException>().WithMessage("*이름*");
+        act.Should().Throw<InvalidFormatException>().WithMessage("*이름*");
     }
 
     [Fact]
-    public void Parse_EmptyArray_ThrowsFormatException()
+    public void Parse_EmptyArray_ThrowsInvalidFormatException()
     {
         var act = () => _parser.Parse("[]");
 
-        act.Should().Throw<FormatException>().WithMessage("*데이터*없*");
+        act.Should().Throw<InvalidFormatException>().WithMessage("*데이터*없*");
     }
 }
