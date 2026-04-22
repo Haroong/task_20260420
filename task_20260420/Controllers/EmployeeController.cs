@@ -37,14 +37,14 @@ public class EmployeeController : ControllerBase
     /// <response code="400">페이지 파라미터 오류</response>
     [HttpGet]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(PagedResult<EmployeeDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponse<PagedResult<EmployeeDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
         var result = await _mediator.Send(new GetEmployeesQuery(page, pageSize));
-        return Ok(result);
+        return Ok(BaseResponse<PagedResult<EmployeeDto>>.OnSuccess(result));
     }
 
     /// <summary>
@@ -56,12 +56,12 @@ public class EmployeeController : ControllerBase
     /// <response code="404">직원을 찾을 수 없음</response>
     [HttpGet("{name}")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(EmployeeDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(BaseResponse<EmployeeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByName(string name)
     {
         var result = await _mediator.Send(new GetEmployeeByNameQuery(name));
-        return Ok(result);
+        return Ok(BaseResponse<EmployeeDto>.OnSuccess(result));
     }
 
     /// <summary>
@@ -75,14 +75,14 @@ public class EmployeeController : ControllerBase
     [HttpPost]
     [Consumes("multipart/form-data")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(AddEmployeesResult), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponse<AddEmployeesResult>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Add(IFormFile? file, [FromForm] string? data)
     {
         var (content, fileName) = await _contentExtractor.ExtractAsync(file, data, Request);
         var employees = _parserFactory.Parse(content, fileName);
         var result = await _mediator.Send(new AddEmployeesCommand(employees));
 
-        return Created(string.Empty, result);
+        return Created(string.Empty, BaseResponse<AddEmployeesResult>.OnCreated(result));
     }
 }

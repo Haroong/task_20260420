@@ -27,7 +27,9 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var body = await DeserializeResponse(response);
-        body.GetProperty("addedCount").GetInt32().Should().Be(2);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeTrue();
+        body.GetProperty("code").GetString().Should().Be("COMMON201");
+        body.GetProperty("result").GetProperty("addedCount").GetInt32().Should().Be(2);
     }
 
     // === POST: JSON 파일 업로드 ===
@@ -42,7 +44,8 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var body = await DeserializeResponse(response);
-        body.GetProperty("addedCount").GetInt32().Should().Be(1);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeTrue();
+        body.GetProperty("result").GetProperty("addedCount").GetInt32().Should().Be(1);
     }
 
     // === POST: CSV 텍스트 직접 입력 ===
@@ -125,8 +128,10 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await DeserializeResponse(response);
-        body.GetProperty("totalCount").GetInt32().Should().BeGreaterThanOrEqualTo(2);
-        body.GetProperty("items").GetArrayLength().Should().BeGreaterThanOrEqualTo(2);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeTrue();
+        var result = body.GetProperty("result");
+        result.GetProperty("totalCount").GetInt32().Should().BeGreaterThanOrEqualTo(2);
+        result.GetProperty("items").GetArrayLength().Should().BeGreaterThanOrEqualTo(2);
     }
 
     [Fact]
@@ -155,8 +160,10 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await DeserializeResponse(response);
-        body.GetProperty("name").GetString().Should().Be(name);
-        body.GetProperty("email").GetString().Should().Be("search@test.com");
+        body.GetProperty("isSuccess").GetBoolean().Should().BeTrue();
+        var result = body.GetProperty("result");
+        result.GetProperty("name").GetString().Should().Be(name);
+        result.GetProperty("email").GetString().Should().Be("search@test.com");
     }
 
     [Fact]

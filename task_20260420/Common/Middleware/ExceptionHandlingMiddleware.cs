@@ -30,26 +30,31 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var (statusCode, message) = exception switch
+        var (statusCode, code, message) = exception switch
         {
             ValidationException validationEx => (
                 HttpStatusCode.BadRequest,
+                ResponseCode.ValidationError,
                 string.Join("; ", validationEx.Errors.Select(e => e.ErrorMessage))),
 
             KeyNotFoundException keyNotFoundEx => (
                 HttpStatusCode.NotFound,
+                ResponseCode.NotFound,
                 keyNotFoundEx.Message),
 
             FormatException formatEx => (
                 HttpStatusCode.BadRequest,
+                ResponseCode.FormatError,
                 formatEx.Message),
 
             ArgumentException argumentEx => (
                 HttpStatusCode.BadRequest,
+                ResponseCode.ArgumentError,
                 argumentEx.Message),
 
             _ => (
                 HttpStatusCode.InternalServerError,
+                ResponseCode.ServerError,
                 "서버 내부 오류가 발생했습니다.")
         };
 
@@ -58,7 +63,7 @@ public class ExceptionHandlingMiddleware
         context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
 
-        var response = new ErrorResponse((int)statusCode, message);
+        var response = BaseResponse<object?>.OnFailure(code, message);
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
