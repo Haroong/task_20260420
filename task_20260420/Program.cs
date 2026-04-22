@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using task_20260420.Common.Behaviors;
 using task_20260420.Common.Middleware;
@@ -23,12 +24,16 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Employee Emergency Contact API",
         Version = "v1",
-        Description = "직원 긴급 연락망 관리 API"
+        Description = "직원 긴급 연락망을 조회하고 CSV/JSON 입력으로 일괄 등록할 수 있는 API입니다."
     });
+
+    var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 });
 
 // === EF Core + SQLite ===

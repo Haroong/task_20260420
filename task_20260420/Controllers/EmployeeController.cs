@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using task_20260420.Common.Models;
 using task_20260420.Features.Employees.Commands.AddEmployees;
+using task_20260420.Features.Employees.Models;
 using task_20260420.Features.Employees.Queries.GetEmployeeByName;
 using task_20260420.Features.Employees.Queries.GetEmployees;
 using task_20260420.Services;
@@ -8,9 +10,7 @@ using task_20260420.Services;
 namespace task_20260420.Controllers;
 
 /// <summary>
-/// 직원 긴급 연락 정보를 관리하는 API Controller.
-/// CQRS 패턴에 따라 Controller는 HTTP 요청/응답 관심사만 담당하고,
-/// 비즈니스 로직은 MediatR를 통해 Command/Query Handler에 위임합니다.
+/// 직원 연락처 API
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -28,16 +28,17 @@ public class EmployeeController : ControllerBase
     }
 
     /// <summary>
-    /// 직원 목록을 페이징하여 조회합니다.
+    /// 직원 목록 조회
     /// </summary>
+    /// <remarks>페이지 단위로 직원 연락처 목록을 조회합니다.</remarks>
     /// <param name="page">페이지 번호 (1부터 시작, 기본값: 1)</param>
     /// <param name="pageSize">페이지당 항목 수 (1~100, 기본값: 10)</param>
-    /// <returns>페이징된 직원 목록 (items, totalCount, page, pageSize, totalPages)</returns>
     /// <response code="200">정상 조회</response>
-    /// <response code="400">잘못된 페이지 파라미터</response>
+    /// <response code="400">페이지 파라미터 오류</response>
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(PagedResult<EmployeeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
@@ -47,15 +48,16 @@ public class EmployeeController : ControllerBase
     }
 
     /// <summary>
-    /// 이름으로 직원을 조회합니다.
+    /// 직원 단건 조회
     /// </summary>
+    /// <remarks>이름으로 직원 연락처 1건을 조회합니다.</remarks>
     /// <param name="name">검색할 직원 이름 (정확히 일치)</param>
-    /// <returns>직원 상세 연락 정보 (name, email, tel, joined)</returns>
     /// <response code="200">직원 정보 반환</response>
-    /// <response code="404">해당 이름의 직원 없음</response>
+    /// <response code="404">직원을 찾을 수 없음</response>
     [HttpGet("{name}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(EmployeeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByName(string name)
     {
         var result = await _mediator.Send(new GetEmployeeByNameQuery(name));
@@ -63,22 +65,18 @@ public class EmployeeController : ControllerBase
     }
 
     /// <summary>
-    /// 직원 연락 정보를 추가합니다.
-    /// 4가지 입력 방식을 지원합니다:
-    /// 1) CSV 파일 업로드 (input type=file, .csv)
-    /// 2) JSON 파일 업로드 (input type=file, .json)
-    /// 3) CSV 텍스트 직접 입력 (textarea → data 필드)
-    /// 4) JSON 텍스트 직접 입력 (textarea → data 필드)
-    /// 포맷은 파일 확장자 또는 내용 기반으로 자동 감지됩니다.
+    /// 직원 등록
     /// </summary>
-    /// <param name="file">CSV 또는 JSON 파일 (선택)</param>
-    /// <param name="data">CSV 또는 JSON 텍스트 (선택)</param>
-    /// <returns>추가된 직원 수</returns>
+    /// <remarks>CSV 또는 JSON 파일/텍스트로 직원 연락처를 등록합니다.</remarks>
+    /// <param name="file">업로드 파일</param>
+    /// <param name="data">직접 입력 데이터</param>
     /// <response code="201">직원 정보 추가 성공</response>
-    /// <response code="400">입력 데이터 형식 오류 또는 필수값 누락</response>
+    /// <response code="400">입력 형식 오류</response>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Consumes("multipart/form-data")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(AddEmployeesResult), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Add(IFormFile? file, [FromForm] string? data)
     {
         var (content, fileName) = await _contentExtractor.ExtractAsync(file, data, Request);
