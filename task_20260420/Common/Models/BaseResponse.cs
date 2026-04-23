@@ -5,6 +5,10 @@ namespace task_20260420.Common.Models;
 /// <summary>
 /// 공통 API 응답 래퍼
 /// </summary>
+/// <param name="IsSuccess">성공 여부 <example>true</example></param>
+/// <param name="Code">응답 코드 <example>COMMON200</example></param>
+/// <param name="Message">응답 메시지 <example>요청이 정상 처리되었습니다.</example></param>
+/// <param name="Result">응답 데이터</param>
 public record BaseResponse<T>(
     [property: JsonPropertyName("isSuccess")] bool IsSuccess,
     [property: JsonPropertyName("code")] string Code,

@@ -5,8 +5,10 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using task_20260420.Common.Behaviors;
 using task_20260420.Common.Middleware;
+using Swashbuckle.AspNetCore.Filters;
 using task_20260420.Infrastructure;
 using task_20260420.Services;
+using task_20260420.Swagger.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +36,12 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+
+    options.ExampleFilters();
+    options.OperationFilter<AddEmployeeOperationFilter>();
 });
+
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
 // === EF Core + SQLite ===
 builder.Services.AddDbContext<AppDbContext>(options =>

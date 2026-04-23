@@ -1,11 +1,13 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 using task_20260420.Common.Models;
 using task_20260420.Features.Employees.Commands.AddEmployees;
 using task_20260420.Features.Employees.Models;
 using task_20260420.Features.Employees.Queries.GetEmployeeByName;
 using task_20260420.Features.Employees.Queries.GetEmployees;
 using task_20260420.Services;
+using task_20260420.Swagger.Examples;
 
 namespace task_20260420.Controllers;
 
@@ -37,6 +39,8 @@ public class EmployeeController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(BaseResponse<PagedResult<EmployeeDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status400BadRequest)]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(GetEmployeesResponseExample))]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ErrorResponseExamples))]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
@@ -56,6 +60,8 @@ public class EmployeeController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(BaseResponse<EmployeeDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status404NotFound)]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(GetEmployeeByNameResponseExample))]
+    [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ErrorResponseExamples))]
     public async Task<IActionResult> GetByName(string name)
     {
         var result = await _mediator.Send(new GetEmployeeByNameQuery(name));
@@ -75,6 +81,8 @@ public class EmployeeController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(BaseResponse<AddEmployeesResult>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status400BadRequest)]
+    [SwaggerResponseExample(StatusCodes.Status201Created, typeof(AddEmployeesResponseExample))]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ErrorResponseExamples))]
     public async Task<IActionResult> Add(IFormFile? file, [FromForm] string? data)
     {
         var body = Request.HasFormContentType ? null : Request.Body;
