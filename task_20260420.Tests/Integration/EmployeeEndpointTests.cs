@@ -86,6 +86,9 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.PostAsync("/api/employee", content);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await DeserializeResponse(response);
+        body.GetProperty("status").GetInt32().Should().Be(400);
+        body.GetProperty("errors").ValueKind.Should().Be(JsonValueKind.Object);
     }
 
     [Fact]
@@ -98,6 +101,10 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.PostAsync("/api/employee", content);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await DeserializeResponse(response);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeFalse();
+        body.GetProperty("code").GetString().Should().Be("FORMAT400");
+        body.GetProperty("message").GetString().Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -109,6 +116,10 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.PostAsync("/api/employee", content);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await DeserializeResponse(response);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeFalse();
+        body.GetProperty("code").GetString().Should().Be("FORMAT400");
+        body.GetProperty("message").GetString().Should().NotBeNullOrEmpty();
     }
 
     // === GET: 페이징 조회 ===
@@ -140,6 +151,10 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.GetAsync("/api/employee?page=0&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await DeserializeResponse(response);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeFalse();
+        body.GetProperty("code").GetString().Should().Be("VALIDATION400");
+        body.GetProperty("message").GetString().Should().NotBeNullOrEmpty();
     }
 
     // === GET: 이름 조회 ===
@@ -172,6 +187,10 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.GetAsync("/api/employee/존재하지않는직원");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var body = await DeserializeResponse(response);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeFalse();
+        body.GetProperty("code").GetString().Should().Be("NOTFOUND404");
+        body.GetProperty("message").GetString().Should().NotBeNullOrEmpty();
     }
 
     // === 헬퍼 메서드 ===
