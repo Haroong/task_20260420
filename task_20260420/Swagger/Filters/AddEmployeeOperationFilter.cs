@@ -54,9 +54,9 @@ public class AddEmployeeOperationFilter : IOperationFilter
 
         textMedia.Examples["CSV 텍스트 입력"] = new OpenApiExample
         {
-            Summary = "CSV 형식으로 직원 등록",
+            Summary = "CSV 형식으로 직원 등록 (헤더 없이 데이터만 입력)",
             Value = new OpenApiString(
-                "이름,이메일,전화번호,입사일\n김민수,minsu.kim@company.com,010-1234-5678,2023-03-15\n이지은,jieun.lee@company.com,010-9876-5432,2024-01-10")
+                "김민수,minsu.kim@company.com,010-1234-5678,2023-03-15\n이지은,jieun.lee@company.com,010-9876-5432,2024-01-10")
         };
     }
 
