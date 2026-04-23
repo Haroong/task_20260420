@@ -193,6 +193,45 @@ public class EmployeeEndpointTests : IClassFixture<CustomWebApplicationFactory>
         body.GetProperty("message").GetString().Should().NotBeNullOrEmpty();
     }
 
+    // === POST: 중복 처리 ===
+
+    [Fact]
+    public async Task PostDuplicateEmail_UpdatesAndReturnsCorrectCounts()
+    {
+        // Arrange: 최초 등록
+        var csv1 = "중복테스트, duptest@test.com, 01011111111, 2020.01.01";
+        var content1 = CreateFileContent(csv1, "first.csv", "text/csv");
+        var response1 = await _client.PostAsync("/api/employee", content1);
+        response1.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        // Act: 같은 이메일로 재등록
+        var csv2 = "중복테스트_수정, duptest@test.com, 01099999999, 2024.06.01";
+        var content2 = CreateFileContent(csv2, "second.csv", "text/csv");
+        var response2 = await _client.PostAsync("/api/employee", content2);
+
+        // Assert
+        response2.StatusCode.Should().Be(HttpStatusCode.Created);
+        var body = await DeserializeResponse(response2);
+        body.GetProperty("isSuccess").GetBoolean().Should().BeTrue();
+        var result = body.GetProperty("result");
+        result.GetProperty("addedCount").GetInt32().Should().Be(0);
+        result.GetProperty("updatedCount").GetInt32().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task PostBatchWithInternalDuplicates_DeduplicatesCorrectly()
+    {
+        // Act: 배치 내 동일 이메일 2건
+        var csv = "첫번째, batchdup@test.com, 01011111111, 2020.01.01\n두번째, batchdup@test.com, 01022222222, 2024.06.01";
+        var content = CreateFileContent(csv, "batch-dup.csv", "text/csv");
+        var response = await _client.PostAsync("/api/employee", content);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var body = await DeserializeResponse(response);
+        body.GetProperty("result").GetProperty("addedCount").GetInt32().Should().Be(1);
+    }
+
     // === 헬퍼 메서드 ===
 
     private static MultipartFormDataContent CreateFileContent(string content, string fileName, string mediaType)

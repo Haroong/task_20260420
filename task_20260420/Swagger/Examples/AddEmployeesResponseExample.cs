@@ -10,11 +10,19 @@ public class AddEmployeesResponseExample
     public IEnumerable<SwaggerExample<BaseResponse<AddEmployeesResult>>> GetExamples()
     {
         yield return SwaggerExample.Create(
-            "등록 성공",
+            "신규 등록",
             new BaseResponse<AddEmployeesResult>(
                 true,
                 ResponseCode.Created,
                 "리소스가 정상 생성되었습니다.",
-                new AddEmployeesResult(3)));
+                new AddEmployeesResult(3, 0)));
+
+        yield return SwaggerExample.Create(
+            "일부 업데이트",
+            new BaseResponse<AddEmployeesResult>(
+                true,
+                ResponseCode.Created,
+                "리소스가 정상 생성되었습니다.",
+                new AddEmployeesResult(2, 1)));
     }
 }
