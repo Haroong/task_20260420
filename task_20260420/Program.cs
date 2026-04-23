@@ -68,8 +68,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // === Middleware ===
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
