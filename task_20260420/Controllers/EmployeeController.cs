@@ -71,13 +71,14 @@ public class EmployeeController : ControllerBase
     /// <response code="201">직원 정보 추가 성공</response>
     /// <response code="400">입력 형식 오류</response>
     [HttpPost]
-    [Consumes("multipart/form-data")]
+    [Consumes("multipart/form-data", "application/json", "text/plain")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(BaseResponse<AddEmployeesResult>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Add(IFormFile? file, [FromForm] string? data)
     {
-        var (content, fileName) = await _contentExtractor.ExtractAsync(file, data, Request);
+        var body = Request.HasFormContentType ? null : Request.Body;
+        var (content, fileName) = await _contentExtractor.ExtractAsync(file, data, body);
         var result = await _mediator.Send(new AddEmployeesCommand(content, fileName));
 
         return Created(string.Empty, BaseResponse<AddEmployeesResult>.OnCreated(result));
